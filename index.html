@@ -117,18 +117,13 @@
     .lmp-date  { font-size:16px; font-weight:700; color:#5a4a52; }
 
     /* Counter card */
-    .counter-card { margin:12px 16px 0; background:#fffaf8; border-radius:28px; border:1.5px solid rgba(244,184,200,0.35); box-shadow:0 4px 24px rgba(200,140,160,.09); padding:28px 24px 24px; text-align:center; }
-    .counter-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#b8aab2; font-weight:600; margin-bottom:20px; }
-    .counter-boxes { display:flex; justify-content:center; gap:16px; align-items:stretch; }
-    .counter-box { flex:1; border-radius:20px; padding:18px 12px; }
-    .counter-box.weeks { background:rgba(244,184,200,0.12); border:1.5px solid rgba(244,184,200,0.4); }
-    .counter-box.xdays { background:rgba(212,196,232,0.14); border:1.5px solid rgba(212,196,232,0.45); }
-    .counter-number { font-size:64px; font-weight:800; line-height:1; letter-spacing:-2px; }
-    .counter-number.weeks { color:#c4748a; }
-    .counter-number.xdays { color:#b9a8d4; }
-    .counter-unit { font-size:15px; font-weight:600; color:#8a7a82; margin-top:6px; }
-    .counter-amp { display:flex; align-items:center; font-size:28px; color:#b8aab2; font-weight:300; }
-    .counter-sub { font-size:13px; color:#b8aab2; margin-top:14px; }
+    .counter-card  { margin:12px 16px 0; background:#fffaf8; border-radius:28px; border:1.5px solid rgba(244,184,200,0.35); box-shadow:0 4px 24px rgba(200,140,160,.09); padding:24px 20px 22px; text-align:center; }
+    .counter-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#b8aab2; font-weight:600; margin-bottom:16px; }
+    .grid3  { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:14px; }
+    .g3box  { border-radius:18px; padding:16px 8px; text-align:center; }
+    .g3num  { font-size:40px; font-weight:800; line-height:1; letter-spacing:-1px; }
+    .g3unit { font-size:13px; font-weight:600; color:#8a7a82; margin-top:6px; }
+    .counter-sub { font-size:12px; color:#b8aab2; margin-bottom:14px; }
 
     /* Progress */
     .progress-wrap  { margin-top:20px; }
@@ -217,15 +212,18 @@
 
     <div class="counter-card card d3">
       <div class="counter-label">You Are Currently</div>
-      <div class="counter-boxes">
-        <div class="counter-box weeks">
-          <div class="counter-number weeks" id="weeks-num">–</div>
-          <div class="counter-unit">Weeks</div>
+      <div class="grid3">
+        <div class="g3box" style="background:rgba(244,184,200,0.14);border:1.5px solid rgba(244,184,200,0.45);">
+          <div class="g3num" style="color:#c4748a;" id="weeks-num">–</div>
+          <div class="g3unit">Weeks</div>
         </div>
-        <div class="counter-amp">&amp;</div>
-        <div class="counter-box xdays">
-          <div class="counter-number xdays" id="days-num">–</div>
-          <div class="counter-unit">Days</div>
+        <div class="g3box" style="background:rgba(212,196,232,0.14);border:1.5px solid rgba(212,196,232,0.45);">
+          <div class="g3num" style="color:#b9a8d4;" id="days-num">–</div>
+          <div class="g3unit">Days</div>
+        </div>
+        <div class="g3box" style="background:rgba(248,212,184,0.18);border:1.5px solid rgba(248,212,184,0.5);">
+          <div class="g3num" style="color:#e8b898;" id="months-num">–</div>
+          <div class="g3unit">Months</div>
         </div>
       </div>
       <div class="counter-sub" id="days-total"></div>
@@ -368,9 +366,15 @@
       const tri          = TRIMESTERS[getTri(weeks)];
       const baby         = getBaby(weeks);
 
-      document.getElementById("weeks-num").textContent   = weeks;
-      document.getElementById("days-num").textContent    = days;
-      document.getElementById("days-total").textContent  = daysPregnant + " days into this beautiful journey";
+      // Pregnancy months: each month = ~4.33 weeks; show whole months + remaining weeks
+      const monthsWhole = Math.floor(weeks / 4.33);
+      const remWeeks    = Math.round(weeks - monthsWhole * 4.33);
+      const monthsSub   = remWeeks > 0 ? ("& " + remWeeks + " week" + (remWeeks > 1 ? "s" : "")) : "";
+
+      document.getElementById("weeks-num").textContent    = weeks;
+      document.getElementById("days-num").textContent     = days;
+      document.getElementById("months-num").textContent   = monthsWhole;
+      document.getElementById("days-total").textContent   = daysPregnant + " days into this beautiful journey";
       document.getElementById("progress-fill").style.width = pct + "%";
       document.getElementById("progress-pct").textContent  = pct + "% complete";
 
