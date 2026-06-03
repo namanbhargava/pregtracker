@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="My Pregnancy"/>
+  <meta name="theme-color" content="#fdf6f0"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+
+  <title>My Pregnancy 🌸</title>
+
+  <!-- App icons for iOS home screen -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjZmRmNmYwIi8+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSI0MCIgZmlsbD0idXJsKCNnKSIvPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZjZThmMCIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2VlZjRmYyIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjx0ZXh0IHg9IjkwIiB5PSIxMTUiIGZvbnQtc2l6ZT0iOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCfjonPC90ZXh0Pjwvc3ZnPg=="/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <!-- Service Worker for offline support -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // Inline service worker via blob
+        const swCode = `
+          const CACHE = 'pregnancy-v1';
+          const ASSETS = [location.href];
+          self.addEventListener('install', e => {
+            e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+          });
+          self.addEventListener('fetch', e => {
+            e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const url  = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(url).catch(() => {});
+      });
+    }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      height: 100%;
+      /* Prevent iOS rubber-band bounce */
+      overflow: hidden;
+    }
+
+    body {
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: none;
+      background: linear-gradient(160deg, #fdf6f0 0%, #fce8f0 55%, #eef4fc 100%);
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+      /* Safe area insets for iPhone notch / Dynamic Island */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      /* Disable text selection & callout */
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Splash screen */
+    #splash {
+      position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(160deg, #fdf6f0 0%, #fce8f0 55%, #eef4fc 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    #splash.hide { opacity: 0; transform: scale(1.04); pointer-events: none; }
+    .splash-icon { font-size: 72px; animation: splashPulse 1.2s ease-in-out infinite; }
+    .splash-title { font-size: 24px; font-weight: 800; color: #5a4a52; }
+    .splash-sub   { font-size: 14px; color: #b8aab2; font-weight: 400; }
+    @keyframes splashPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+
+    /* Blobs */
+    .blob { position: fixed; border-radius: 50%; filter: blur(52px); pointer-events: none; z-index: 0; }
+    .blob-0 { top:4%;  left:8%;  width:220px; height:220px; background:rgba(244,184,200,0.22); animation:blob0 8.5s ease-in-out infinite alternate; }
+    .blob-1 { top:52%; right:4%; width:260px; height:260px; background:rgba(212,196,232,0.18); animation:blob1 10s   ease-in-out infinite alternate; }
+    .blob-2 { top:32%; left:52%; width:150px; height:150px; background:rgba(184,216,196,0.18); animation:blob2 9s    ease-in-out infinite alternate; }
+    .blob-3 { top:78%; left:18%; width:190px; height:190px; background:rgba(248,212,184,0.16); animation:blob3 11.5s ease-in-out infinite alternate; }
+
+    @keyframes blob0 { from{transform:translateY(0) scale(1)}   to{transform:translateY(-18px) scale(1.04)} }
+    @keyframes blob1 { from{transform:translateY(0)}            to{transform:translateY(14px) scale(.97)} }
+    @keyframes blob2 { from{transform:translateY(0)}            to{transform:translateY(-11px) rotate(3deg)} }
+    @keyframes blob3 { from{transform:translateY(0)}            to{transform:translateY(13px) scale(1.03)} }
+    @keyframes fadeUp    { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes heartbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.2)} 28%{transform:scale(1)} 42%{transform:scale(1.12)} }
+
+    .heart { animation: heartbeat 1.5s ease-in-out infinite; display: inline-block; }
+    .card  { opacity: 0; animation: fadeUp .5s ease forwards; }
+    .d1{animation-delay:.05s} .d2{animation-delay:.12s} .d3{animation-delay:.20s}
+    .d4{animation-delay:.28s} .d5{animation-delay:.36s} .d6{animation-delay:.44s} .d7{animation-delay:.52s}
+
+    /* Layout */
+    .app { position:relative; z-index:1; width:100%; max-width:420px; margin:0 auto; padding:0 0 52px; }
+
+    /* Header */
+    .header { padding:32px 24px 0; text-align:center; }
+    .header-label { font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:#c4748a; font-weight:700; margin-bottom:6px; }
+    .header h1 { font-size:30px; font-weight:800; color:#5a4a52; line-height:1.2; }
+    .header h1 span { font-weight:300; color:#8a7a82; font-size:22px; }
+
+    /* LMP Pill */
+    .lmp-pill { margin:20px 16px 0; background:rgba(244,184,200,0.2); border-radius:16px; border:1.5px solid rgba(244,184,200,0.5); padding:13px 18px; display:flex; align-items:center; gap:12px; }
+    .lmp-icon { width:36px; height:36px; border-radius:10px; background:rgba(244,184,200,0.35); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+    .lmp-label { font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:#c4748a; font-weight:700; margin-bottom:1px; }
+    .lmp-date  { font-size:16px; font-weight:700; color:#5a4a52; }
+
+    /* Counter card */
+    .counter-card { margin:12px 16px 0; background:#fffaf8; border-radius:28px; border:1.5px solid rgba(244,184,200,0.35); box-shadow:0 4px 24px rgba(200,140,160,.09); padding:28px 24px 24px; text-align:center; }
+    .counter-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#b8aab2; font-weight:600; margin-bottom:20px; }
+    .counter-boxes { display:flex; justify-content:center; gap:16px; align-items:stretch; }
+    .counter-box { flex:1; border-radius:20px; padding:18px 12px; }
+    .counter-box.weeks { background:rgba(244,184,200,0.12); border:1.5px solid rgba(244,184,200,0.4); }
+    .counter-box.xdays { background:rgba(212,196,232,0.14); border:1.5px solid rgba(212,196,232,0.45); }
+    .counter-number { font-size:64px; font-weight:800; line-height:1; letter-spacing:-2px; }
+    .counter-number.weeks { color:#c4748a; }
+    .counter-number.xdays { color:#b9a8d4; }
+    .counter-unit { font-size:15px; font-weight:600; color:#8a7a82; margin-top:6px; }
+    .counter-amp { display:flex; align-items:center; font-size:28px; color:#b8aab2; font-weight:300; }
+    .counter-sub { font-size:13px; color:#b8aab2; margin-top:14px; }
+
+    /* Progress */
+    .progress-wrap  { margin-top:20px; }
+    .progress-track { height:7px; background:rgba(200,180,190,0.18); border-radius:99px; overflow:hidden; }
+    .progress-fill  { height:100%; background:linear-gradient(90deg,#f4b8c8,#d4c4e8); border-radius:99px; box-shadow:0 0 8px rgba(244,184,200,.45); transition:width 1.2s ease; }
+    .progress-labels{ display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:#b8aab2; }
+    .progress-pct   { color:#c4748a; font-weight:700; }
+
+    /* Trimester */
+    .tri-badge { margin:12px 16px 0; border-radius:18px; border:1.5px solid; padding:14px 18px; display:flex; align-items:center; gap:14px; }
+    .tri-icon  { width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+    .tri-name  { font-size:16px; font-weight:700; }
+    .tri-weeks { font-size:12px; color:#b8aab2; }
+
+    /* Baby */
+    .baby-card { margin:12px 16px 0; background:#fffaf8; border-radius:24px; border:1.5px solid rgba(248,212,184,0.5); box-shadow:0 2px 16px rgba(200,160,130,.07); padding:22px; text-align:center; }
+    .baby-section-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#b8aab2; font-weight:600; margin-bottom:14px; }
+    .baby-emoji { font-size:58px; line-height:1; margin-bottom:10px; }
+    .baby-fruit { font-size:22px; font-weight:700; color:#5a4a52; }
+    .baby-size  { font-size:13px; color:#b8aab2; margin-top:4px; }
+
+    /* Stats */
+    .stats-grid { margin:12px 16px 0; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .stat-card  { background:#fffaf8; border-radius:18px; box-shadow:0 2px 12px rgba(180,140,160,.06); padding:16px 14px; transition:transform .2s,box-shadow .2s; }
+    .stat-card:active { transform:scale(0.97); }
+    .stat-card.full { grid-column:1 / -1; display:flex; align-items:center; gap:16px; }
+    .stat-icon  { font-size:20px; margin-bottom:8px; }
+    .stat-icon.inline { margin-bottom:0; }
+    .stat-label { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#b8aab2; font-weight:600; margin-bottom:3px; }
+    .stat-value { font-size:14px; font-weight:600; color:#5a4a52; line-height:1.2; }
+    .stat-value.big { font-size:34px; font-weight:800; }
+    .stat-sub   { font-size:11px; color:#b8aab2; margin-top:2px; }
+
+    /* Milestones */
+    .milestones { margin:12px 16px 0; background:#fffaf8; border-radius:24px; border:1.5px solid rgba(200,180,190,0.28); box-shadow:0 2px 16px rgba(180,140,160,.06); padding:20px; }
+    .milestones-title { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#b8aab2; font-weight:600; margin-bottom:18px; }
+    .milestone-row { display:flex; align-items:center; gap:14px; margin-bottom:16px; transition:opacity .3s; }
+    .milestone-row:last-child { margin-bottom:0; }
+    .milestone-row.done    { opacity:1; }
+    .milestone-row.pending { opacity:0.36; }
+    .m-icon  { width:34px; height:34px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; }
+    .m-label { font-size:14px; }
+    .m-label.current { color:#c4748a; font-weight:700; }
+    .m-label.past    { color:#5a4a52; }
+    .m-label.future  { color:#b8aab2; }
+    .m-week  { font-size:11px; color:#b8aab2; }
+    .m-check { width:20px; height:20px; border-radius:50%; background:rgba(212,196,232,0.35); display:flex; align-items:center; justify-content:center; font-size:11px; color:#b9a8d4; flex-shrink:0; }
+    .m-dot   { width:8px; height:8px; border-radius:50%; background:#f4b8c8; box-shadow:0 0 8px #f4b8c8; flex-shrink:0; }
+
+    /* Footer */
+    .footer       { margin:22px 16px 0; text-align:center; }
+    .footer-quote { font-style:italic; font-size:15px; color:#b8aab2; line-height:1.7; font-weight:300; }
+    .footer-note  { margin-top:10px; font-size:11px; color:rgba(184,170,178,0.5); }
+  </style>
+</head>
+<body>
+
+  <!-- Splash screen -->
+  <div id="splash">
+    <div class="splash-icon">🌸</div>
+    <div class="splash-title">My Pregnancy</div>
+    <div class="splash-sub">Loading your journey...</div>
+  </div>
+
+  <!-- Background blobs -->
+  <div class="blob blob-0"></div>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="app">
+
+    <div class="header card d1">
+      <div class="header-label">My Pregnancy</div>
+      <h1>Little One<br/><span>is growing beautifully</span></h1>
+      <div class="heart" style="font-size:28px;margin-top:10px">🌸</div>
+    </div>
+
+    <div class="lmp-pill card d2">
+      <div class="lmp-icon">📍</div>
+      <div>
+        <div class="lmp-label">Last Period Started</div>
+        <div class="lmp-date">17 March 2026</div>
+      </div>
+    </div>
+
+    <div class="counter-card card d3">
+      <div class="counter-label">You Are Currently</div>
+      <div class="counter-boxes">
+        <div class="counter-box weeks">
+          <div class="counter-number weeks" id="weeks-num">–</div>
+          <div class="counter-unit">Weeks</div>
+        </div>
+        <div class="counter-amp">&amp;</div>
+        <div class="counter-box xdays">
+          <div class="counter-number xdays" id="days-num">–</div>
+          <div class="counter-unit">Days</div>
+        </div>
+      </div>
+      <div class="counter-sub" id="days-total"></div>
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-labels">
+          <span>Week 1</span>
+          <span class="progress-pct" id="progress-pct"></span>
+          <span>Week 40</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tri-badge card d4" id="tri-badge">
+      <div class="tri-icon" id="tri-icon"></div>
+      <div>
+        <div class="tri-name"  id="tri-name"></div>
+        <div class="tri-weeks" id="tri-weeks-range"></div>
+      </div>
+    </div>
+
+    <div class="baby-card card d4">
+      <div class="baby-section-label">Baby's Size This Week</div>
+      <div class="baby-emoji" id="baby-emoji"></div>
+      <div class="baby-fruit" id="baby-fruit"></div>
+      <div class="baby-size"  id="baby-size"></div>
+    </div>
+
+    <div class="stats-grid card d5">
+      <div class="stat-card" style="border:1.5px solid rgba(244,184,200,0.6)">
+        <div class="stat-icon">🗓️</div>
+        <div class="stat-label">Due Date</div>
+        <div class="stat-value" id="due-date"></div>
+      </div>
+      <div class="stat-card" style="border:1.5px solid rgba(212,196,232,0.6)">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label">Days Left</div>
+        <div class="stat-value big" id="days-left"></div>
+        <div class="stat-sub">to meet baby</div>
+      </div>
+      <div class="stat-card full" style="border:1.5px solid rgba(248,212,184,0.6)">
+        <div class="stat-icon inline">📅</div>
+        <div>
+          <div class="stat-label">LMP Date</div>
+          <div class="stat-value">17 March 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="milestones card d6">
+      <div class="milestones-title">Trimester Milestones</div>
+      <div id="milestones-list"></div>
+    </div>
+
+    <div class="footer card d7">
+      <div class="footer-quote">"Every day, your body is doing<br/>something extraordinary." 🌸</div>
+      <div class="footer-note">Updates automatically · Works offline</div>
+    </div>
+
+  </div>
+
+  <script>
+    // Hide splash after fonts + first render
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splash');
+        splash.classList.add('hide');
+        setTimeout(() => splash.remove(), 500);
+      }, 1200);
+    });
+
+    const LMP = new Date("2026-03-17T00:00:00");
+
+    const BABY_SIZES = [
+      { week:4,  fruit:"Poppy Seed",       emoji:"🌱", size:"1mm"    },
+      { week:5,  fruit:"Sesame Seed",       emoji:"🌿", size:"3mm"    },
+      { week:6,  fruit:"Sweet Pea",         emoji:"🫛", size:"6mm"    },
+      { week:7,  fruit:"Blueberry",         emoji:"🫐", size:"1cm"    },
+      { week:8,  fruit:"Raspberry",         emoji:"🍇", size:"1.6cm"  },
+      { week:9,  fruit:"Cherry",            emoji:"🍒", size:"2.3cm"  },
+      { week:10, fruit:"Strawberry",        emoji:"🍓", size:"3.1cm"  },
+      { week:11, fruit:"Lime",              emoji:"🍋", size:"4.1cm"  },
+      { week:12, fruit:"Plum",              emoji:"🍑", size:"5.4cm"  },
+      { week:13, fruit:"Peach",             emoji:"🍑", size:"7.4cm"  },
+      { week:14, fruit:"Lemon",             emoji:"🍋", size:"8.7cm"  },
+      { week:15, fruit:"Apple",             emoji:"🍏", size:"10.1cm" },
+      { week:16, fruit:"Avocado",           emoji:"🥑", size:"11.6cm" },
+      { week:17, fruit:"Pear",              emoji:"🍐", size:"13cm"   },
+      { week:18, fruit:"Bell Pepper",       emoji:"🫑", size:"14.2cm" },
+      { week:19, fruit:"Mango",             emoji:"🥭", size:"15.3cm" },
+      { week:20, fruit:"Banana",            emoji:"🍌", size:"25.6cm" },
+      { week:21, fruit:"Pomegranate",       emoji:"🍎", size:"26.7cm" },
+      { week:22, fruit:"Papaya",            emoji:"🍈", size:"27.8cm" },
+      { week:23, fruit:"Eggplant",          emoji:"🍆", size:"28.9cm" },
+      { week:24, fruit:"Cantaloupe",        emoji:"🍈", size:"30cm"   },
+      { week:25, fruit:"Cauliflower",       emoji:"🥦", size:"34.6cm" },
+      { week:26, fruit:"Kale Bunch",        emoji:"🥬", size:"35.6cm" },
+      { week:27, fruit:"Rutabaga",          emoji:"🌰", size:"36.6cm" },
+      { week:28, fruit:"Eggplant",          emoji:"🍆", size:"37.6cm" },
+      { week:29, fruit:"Butternut Squash",  emoji:"🎃", size:"38.6cm" },
+      { week:30, fruit:"Cabbage",           emoji:"🥬", size:"39.9cm" },
+      { week:31, fruit:"Coconut",           emoji:"🥥", size:"41.1cm" },
+      { week:32, fruit:"Squash",            emoji:"🎃", size:"42.4cm" },
+      { week:33, fruit:"Pineapple",         emoji:"🍍", size:"43.7cm" },
+      { week:34, fruit:"Butternut Squash",  emoji:"🎃", size:"45cm"   },
+      { week:35, fruit:"Honeydew Melon",    emoji:"🍈", size:"46.2cm" },
+      { week:36, fruit:"Romaine Lettuce",   emoji:"🥬", size:"47.4cm" },
+      { week:37, fruit:"Swiss Chard",       emoji:"🌿", size:"48.6cm" },
+      { week:38, fruit:"Leek",              emoji:"🧅", size:"49.8cm" },
+      { week:39, fruit:"Watermelon",        emoji:"🍉", size:"50.7cm" },
+      { week:40, fruit:"Pumpkin",           emoji:"🎃", size:"51.2cm" },
+    ];
+
+    const TRIMESTERS = {
+      1: { name:"First Trimester",  range:"Weeks 1–12",  color:"#c4748a", pastel:"#f4b8c8", bg:"rgba(244,184,200,0.18)", icon:"🌱" },
+      2: { name:"Second Trimester", range:"Weeks 13–27", color:"#8dbfa0", pastel:"#b8d8c4", bg:"rgba(184,216,196,0.18)", icon:"🌿" },
+      3: { name:"Third Trimester",  range:"Weeks 28–40", color:"#8ab8d4", pastel:"#b8d4e8", bg:"rgba(184,212,232,0.18)", icon:"🌸" },
+    };
+
+    const MILESTONES = [
+      { week:1,  label:"1st Trimester begins", icon:"🌱" },
+      { week:13, label:"2nd Trimester begins", icon:"🌿" },
+      { week:20, label:"Anatomy scan",         icon:"🩺" },
+      { week:28, label:"3rd Trimester begins", icon:"🌸" },
+      { week:37, label:"Full term",            icon:"👶" },
+      { week:40, label:"Due date",             icon:"🎉" },
+    ];
+
+    function fmtDate(d) {
+      return d.toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+    }
+    function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+    function getTri(w)     { return w <= 12 ? 1 : w <= 27 ? 2 : 3; }
+    function getBaby(w)    { return [...BABY_SIZES].reverse().find(b => b.week <= w) || BABY_SIZES[0]; }
+
+    function update() {
+      const now          = new Date();
+      const daysPregnant = Math.floor((now - LMP) / 86400000);
+      const weeks        = Math.floor(daysPregnant / 7);
+      const days         = daysPregnant % 7;
+      const dueDate      = addDays(LMP, 280);
+      const daysLeft     = Math.max(0, Math.floor((dueDate - now) / 86400000));
+      const pct          = Math.min(100, (daysPregnant / 280) * 100).toFixed(1);
+      const tri          = TRIMESTERS[getTri(weeks)];
+      const baby         = getBaby(weeks);
+
+      document.getElementById("weeks-num").textContent   = weeks;
+      document.getElementById("days-num").textContent    = days;
+      document.getElementById("days-total").textContent  = daysPregnant + " days into this beautiful journey";
+      document.getElementById("progress-fill").style.width = pct + "%";
+      document.getElementById("progress-pct").textContent  = pct + "% complete";
+
+      const badge = document.getElementById("tri-badge");
+      badge.style.background  = tri.bg;
+      badge.style.borderColor = tri.pastel;
+      const triIcon = document.getElementById("tri-icon");
+      triIcon.textContent      = tri.icon;
+      triIcon.style.background = tri.pastel + "55";
+      document.getElementById("tri-name").textContent        = tri.name;
+      document.getElementById("tri-name").style.color        = tri.color;
+      document.getElementById("tri-weeks-range").textContent = tri.range;
+
+      document.getElementById("baby-emoji").textContent = baby.emoji;
+      document.getElementById("baby-fruit").textContent = baby.fruit;
+      document.getElementById("baby-size").textContent  = "About " + baby.size + " long";
+      document.getElementById("due-date").textContent   = fmtDate(dueDate);
+      document.getElementById("days-left").textContent  = daysLeft;
+
+      // Milestones
+      const list = document.getElementById("milestones-list");
+      list.innerHTML = "";
+      MILESTONES.forEach((m, i) => {
+        const done    = weeks >= m.week;
+        const current = done && (i === MILESTONES.length - 1 ? true : weeks < MILESTONES[i + 1].week);
+
+        const row = document.createElement("div");
+        row.className = "milestone-row " + (done ? "done" : "pending");
+        if (i < MILESTONES.length - 1) row.style.marginBottom = "16px";
+
+        const iconBox = document.createElement("div");
+        iconBox.className   = "m-icon";
+        iconBox.textContent = m.icon;
+        iconBox.style.background = current ? "rgba(244,184,200,0.32)" : done ? "rgba(212,196,232,0.22)" : "rgba(200,180,190,0.1)";
+        iconBox.style.border     = current ? "2px solid #f4b8c8" : done ? "1.5px solid rgba(185,168,212,0.33)" : "1px solid rgba(200,180,190,0.22)";
+
+        const info = document.createElement("div");
+        info.style.flex = "1";
+
+        const lbl = document.createElement("div");
+        lbl.className   = "m-label " + (current ? "current" : done ? "past" : "future");
+        lbl.textContent = m.label;
+
+        const wk = document.createElement("div");
+        wk.className   = "m-week";
+        wk.textContent = "Week " + m.week;
+
+        info.appendChild(lbl);
+        info.appendChild(wk);
+        row.appendChild(iconBox);
+        row.appendChild(info);
+
+        if (done && !current) {
+          const chk = document.createElement("div");
+          chk.className   = "m-check";
+          chk.textContent = "✓";
+          row.appendChild(chk);
+        } else if (current) {
+          const dot = document.createElement("div");
+          dot.className = "m-dot";
+          row.appendChild(dot);
+        }
+
+        list.appendChild(row);
+      });
+    }
+
+    update();
+    setInterval(update, 60000);
+  </script>
+</body>
+</html>
